@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback } from 'react';
 import GameBoard from './GameBoard';
 import ScoreBoard from './ScoreBoard';
@@ -21,6 +20,7 @@ const BOARD_SIZE = 20;
 const INITIAL_SNAKE = [{ x: 10, y: 10 }];
 const INITIAL_DIRECTION = { x: 0, y: -1 };
 const GAME_SPEED = 150;
+const HIGH_SCORE_KEY = 'snake-game-high-score';
 
 const SnakeGame = () => {
   const { toast } = useToast();
@@ -32,6 +32,34 @@ const SnakeGame = () => {
     score: 0,
   });
   const [isPlaying, setIsPlaying] = useState(false);
+  const [highScore, setHighScore] = useState(0);
+
+  // Load high score from localStorage on component mount
+  useEffect(() => {
+    const savedHighScore = localStorage.getItem(HIGH_SCORE_KEY);
+    if (savedHighScore) {
+      setHighScore(parseInt(savedHighScore, 10));
+    }
+  }, []);
+
+  // Save high score to localStorage when it changes
+  const updateHighScore = useCallback((newScore: number) => {
+    const currentHighScore = parseInt(localStorage.getItem(HIGH_SCORE_KEY) || '0', 10);
+    if (newScore > currentHighScore) {
+      localStorage.setItem(HIGH_SCORE_KEY, newScore.toString());
+      setHighScore(newScore);
+      
+      // Show celebration toast for new high score
+      toast({
+        title: "🎉 NEW HIGH SCORE! 🎉",
+        description: `Congratulations! You scored ${newScore} points!`,
+        duration: 5000,
+      });
+      
+      return true; // Indicates a new high score was set
+    }
+    return false;
+  }, [toast]);
 
   const generateFood = useCallback((snake: Position[]): Position => {
     let newFood: Position;
@@ -56,6 +84,7 @@ const SnakeGame = () => {
 
       // Check wall collision
       if (head.x < 0 || head.x >= BOARD_SIZE || head.y < 0 || head.y >= BOARD_SIZE) {
+        updateHighScore(prevState.score);
         toast({
           title: "Game Over!",
           description: `You hit the wall! Final score: ${prevState.score}`,
@@ -66,6 +95,7 @@ const SnakeGame = () => {
 
       // Check self collision
       if (newSnake.some(segment => segment.x === head.x && segment.y === head.y)) {
+        updateHighScore(prevState.score);
         toast({
           title: "Game Over!",
           description: `You hit yourself! Final score: ${prevState.score}`,
@@ -103,7 +133,7 @@ const SnakeGame = () => {
         snake: newSnake,
       };
     });
-  }, [gameState.gameOver, isPlaying, generateFood, toast]);
+  }, [gameState.gameOver, isPlaying, generateFood, toast, updateHighScore]);
 
   const handleKeyPress = useCallback((e: KeyboardEvent) => {
     if (gameState.gameOver) return;
@@ -171,6 +201,7 @@ const SnakeGame = () => {
     <div className="bg-black/20 backdrop-blur-lg rounded-2xl p-6 border border-white/10 shadow-2xl">
       <ScoreBoard 
         score={gameState.score} 
+        highScore={highScore}
         isPlaying={isPlaying} 
         gameOver={gameState.gameOver}
         onStart={startGame}
@@ -182,6 +213,8 @@ const SnakeGame = () => {
         food={gameState.food}
         boardSize={BOARD_SIZE}
         gameOver={gameState.gameOver}
+        score={gameState.score}
+        highScore={highScore}
       />
       <div className="mt-4 text-center text-gray-400 text-sm">
         Use arrow keys to move • Space to pause • Click Start to begin

@@ -1,10 +1,10 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { Play, Pause, RotateCcw } from 'lucide-react';
+import { Play, Pause, RotateCcw, Trophy } from 'lucide-react';
 
 interface ScoreBoardProps {
   score: number;
+  highScore: number;
   isPlaying: boolean;
   gameOver: boolean;
   onStart: () => void;
@@ -14,6 +14,7 @@ interface ScoreBoardProps {
 
 const ScoreBoard = ({ 
   score, 
+  highScore,
   isPlaying, 
   gameOver, 
   onStart, 
@@ -27,6 +28,16 @@ const ScoreBoard = ({
           <div className="text-gray-400 text-sm font-medium">Score</div>
           <div className="text-white text-2xl font-bold animate-fade-in">
             {score}
+          </div>
+        </div>
+
+        <div className="text-center">
+          <div className="text-gray-400 text-sm font-medium flex items-center gap-1">
+            <Trophy className="w-3 h-3" />
+            High Score
+          </div>
+          <div className="text-yellow-400 text-xl font-bold">
+            {highScore}
           </div>
         </div>
         
