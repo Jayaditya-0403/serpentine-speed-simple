@@ -9,24 +9,32 @@ interface GameBoardProps {
   gameOver: boolean;
   score: number;
   highScore: number;
+  direction: Position;
 }
 
-const GameBoard = ({ snake, food, boardSize, gameOver, score, highScore }: GameBoardProps) => {
+const GameBoard = ({ snake, food, boardSize, gameOver, score, highScore, direction }: GameBoardProps) => {
+  const getSnakeHeadRotation = () => {
+    if (direction.x === 1) return 'rotate-90';
+    if (direction.x === -1) return '-rotate-90';
+    if (direction.y === 1) return 'rotate-180';
+    return 'rotate-0';
+  };
+
   const renderCell = (x: number, y: number) => {
     const isSnakeHead = snake[0]?.x === x && snake[0]?.y === y;
     const isSnakeBody = snake.slice(1).some(segment => segment.x === x && segment.y === y);
     const isFood = food.x === x && food.y === y;
 
-    let cellClass = "w-full h-full transition-all duration-75 ";
+    let cellClass = "w-full h-full transition-all duration-75 relative flex items-center justify-center ";
 
     if (isSnakeHead) {
       cellClass += gameOver 
         ? "bg-red-500 shadow-lg shadow-red-500/50" 
-        : "bg-green-400 shadow-lg shadow-green-400/50 animate-pulse";
+        : "bg-green-400 shadow-lg shadow-green-400/50";
     } else if (isSnakeBody) {
-      cellClass += "bg-green-600";
+      cellClass += "bg-green-600 shadow-md";
     } else if (isFood) {
-      cellClass += "bg-red-500 rounded-full shadow-lg shadow-red-500/50 animate-pulse";
+      cellClass += "bg-transparent";
     } else {
       cellClass += "bg-gray-800/30 border border-gray-700/20";
     }
@@ -34,9 +42,25 @@ const GameBoard = ({ snake, food, boardSize, gameOver, score, highScore }: GameB
     return (
       <div key={`${x}-${y}`} className="relative">
         <div className={cellClass}>
+          {isSnakeHead && (
+            <div className={`text-2xl transform transition-transform duration-150 ${getSnakeHeadRotation()}`}>
+              🐍
+            </div>
+          )}
+          {isSnakeBody && (
+            <div className="w-4 h-4 bg-green-700 rounded-full border-2 border-green-500 shadow-inner"></div>
+          )}
           {isFood && (
-            <div className="absolute inset-0 flex items-center justify-center text-yellow-400 text-xs">
-              🍎
+            <div className="relative">
+              {/* Apple body */}
+              <div className="w-6 h-6 bg-red-500 rounded-full shadow-lg relative">
+                {/* Apple highlight */}
+                <div className="absolute top-1 left-1 w-2 h-2 bg-red-300 rounded-full opacity-70"></div>
+                {/* Apple stem */}
+                <div className="absolute -top-1 left-1/2 transform -translate-x-1/2 w-1 h-2 bg-amber-700 rounded-sm"></div>
+                {/* Apple leaf */}
+                <div className="absolute -top-0.5 left-1/2 transform translate-x-0.5 w-2 h-1 bg-green-500 rounded-full rotate-12"></div>
+              </div>
             </div>
           )}
         </div>

@@ -111,12 +111,12 @@ const SnakeGame = () => {
         const newFood = generateFood(newSnake);
         const newScore = prevState.score + 10;
         
-        if (newScore % 50 === 0) {
-          toast({
-            title: "Great job!",
-            description: `Score: ${newScore}`,
-          });
-        }
+        // Show eating feedback
+        toast({
+          title: "🍎 Yummy!",
+          description: `Score: ${newScore}`,
+          duration: 1000,
+        });
         
         return {
           ...prevState,
@@ -215,6 +215,7 @@ const SnakeGame = () => {
         gameOver={gameState.gameOver}
         score={gameState.score}
         highScore={highScore}
+        direction={gameState.direction}
       />
       <div className="mt-4 text-center text-gray-400 text-sm">
         Use arrow keys to move • Space to pause • Click Start to begin
